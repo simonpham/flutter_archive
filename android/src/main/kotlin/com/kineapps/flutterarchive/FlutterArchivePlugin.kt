@@ -43,10 +43,10 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        Log.d(LOG_TAG, "onAttachedToEngine - IN")
+        // Log.d(LOG_TAG, "onAttachedToEngine - IN")
 
         if (pluginBinding != null) {
-            Log.w(LOG_TAG, "onAttachedToEngine - already attached")
+            // Log.w(LOG_TAG, "onAttachedToEngine - already attached")
         }
 
         pluginBinding = binding
@@ -54,35 +54,35 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
         val messenger = pluginBinding?.binaryMessenger
         doOnAttachedToEngine(messenger!!)
 
-        Log.d(LOG_TAG, "onAttachedToEngine - OUT")
+        // Log.d(LOG_TAG, "onAttachedToEngine - OUT")
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        Log.d(LOG_TAG, "onDetachedFromEngine")
+        // Log.d(LOG_TAG, "onDetachedFromEngine")
         doOnDetachedFromEngine()
     }
 
     private fun doOnAttachedToEngine(messenger: BinaryMessenger) {
-        Log.d(LOG_TAG, "doOnAttachedToEngine - IN")
+        // Log.d(LOG_TAG, "doOnAttachedToEngine - IN")
 
         methodChannel = MethodChannel(messenger, "flutter_archive")
         methodChannel?.setMethodCallHandler(this)
 
-        Log.d(LOG_TAG, "doOnAttachedToEngine - OUT")
+        // Log.d(LOG_TAG, "doOnAttachedToEngine - OUT")
     }
 
     private fun doOnDetachedFromEngine() {
-        Log.d(LOG_TAG, "doOnDetachedFromEngine - IN")
+        // Log.d(LOG_TAG, "doOnDetachedFromEngine - IN")
 
         if (pluginBinding == null) {
-            Log.w(LOG_TAG, "doOnDetachedFromEngine - already detached")
+            // Log.w(LOG_TAG, "doOnDetachedFromEngine - already detached")
         }
         pluginBinding = null
 
         methodChannel?.setMethodCallHandler(null)
         methodChannel = null
 
-        Log.d(LOG_TAG, "doOnDetachedFromEngine - OUT")
+        // Log.d(LOG_TAG, "doOnDetachedFromEngine - OUT")
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -104,7 +104,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                         }
                         result.success(true)
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        // e.printStackTrace()
                         result.error("zip_error", e.localizedMessage, e.toString())
                     }
                 }
@@ -122,7 +122,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                         }
                         result.success(true)
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        // e.printStackTrace()
                         result.error("zip_error", e.localizedMessage, e.toString())
                     }
                 }
@@ -135,14 +135,14 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                         val reportProgress = call.argument<Boolean>("reportProgress")
                         val jobId = call.argument<Int>("jobId")
 
-                        Log.d(LOG_TAG, "onMethodCall / unzip...")
+                        // Log.d(LOG_TAG, "onMethodCall / unzip...")
                         withContext(Dispatchers.IO) {
                             unzip(zipFile!!, destinationDir!!, reportProgress == true, jobId!!)
                         }
-                        Log.d(LOG_TAG, "...onMethodCall / unzip")
+                        // Log.d(LOG_TAG, "...onMethodCall / unzip")
                         result.success(true)
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        // e.printStackTrace()
                         result.error("unzip_error", e.localizedMessage, e.toString())
                     }
                 }
@@ -153,7 +153,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
 
     @Throws(IOException::class)
     private suspend fun zip(sourceDirPath: String, zipFilePath: String, recurseSubDirs: Boolean, includeBaseDirectory: Boolean, reportProgress: Boolean, jobId: Int) {
-        Log.i("zip", "sourceDirPath: $sourceDirPath, zipFilePath: $zipFilePath, recurseSubDirs: $recurseSubDirs, includeBaseDirectory: $includeBaseDirectory")
+        // Log.i("zip", "sourceDirPath: $sourceDirPath, zipFilePath: $zipFilePath, recurseSubDirs: $recurseSubDirs, includeBaseDirectory: $includeBaseDirectory")
 
         val rootDirectory = if (includeBaseDirectory) File(sourceDirPath).parentFile else File(sourceDirPath)
 
@@ -193,7 +193,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                 if (!recurseSubDirs) {
                     continue
                 }
-                Log.i("zip", "Adding directory: $relativePath")
+                // Log.i("zip", "Adding directory: $relativePath")
 
                 // add directory entry
                 val entry = ZipEntry(relativePath + File.separator)
@@ -205,9 +205,9 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                     val progress: Double =
                             handledFilesCount.toDouble() / totalFilesCount.toDouble() * 100.0
 
-                    Log.d(LOG_TAG, "Waiting reportProgress...")
+                    // Log.d(LOG_TAG, "Waiting reportProgress...")
                     val zipFileOperation = reportProgress(jobId, entry, progress)
-                    Log.d(LOG_TAG, "...reportProgress: $zipFileOperation")
+                    // Log.d(LOG_TAG, "...reportProgress: $zipFileOperation")
 
                     if (zipFileOperation == ZipFileOperation.SKIP_ITEM) {
                         continue
@@ -231,7 +231,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                         totalFilesCount,
                         handledFilesCount)
             } else {
-                Log.i("zip", "Adding file: $relativePath")
+                // Log.i("zip", "Adding file: $relativePath")
                 ++handledFilesCount
                 withContext(Dispatchers.IO) {
                     FileInputStream(f).use { fileInputStream ->
@@ -244,9 +244,9 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                             val progress: Double =
                                     handledFilesCount.toDouble() / totalFilesCount.toDouble() * 100.0
 
-                            Log.d(LOG_TAG, "Waiting reportProgress...")
+                            // Log.d(LOG_TAG, "Waiting reportProgress...")
                             val zipFileOperation = reportProgress(jobId, entry, progress)
-                            Log.d(LOG_TAG, "...reportProgress: $zipFileOperation")
+                            // Log.d(LOG_TAG, "...reportProgress: $zipFileOperation")
 
                             when (zipFileOperation) {
                                 ZipFileOperation.INCLUDE_ITEM -> {
@@ -273,8 +273,8 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
 
     @Throws(IOException::class)
     private fun zipFiles(sourceDirPath: String, relativeFilePaths: List<String>, zipFilePath: String, includeBaseDirectory: Boolean) {
-        Log.i("zip", "sourceDirPath: $sourceDirPath, zipFilePath: $zipFilePath, includeBaseDirectory: $includeBaseDirectory")
-        Log.i("zip", "Files: ${relativeFilePaths.joinToString(",")}")
+        // Log.i("zip", "sourceDirPath: $sourceDirPath, zipFilePath: $zipFilePath, includeBaseDirectory: $includeBaseDirectory")
+        // Log.i("zip", "Files: ${relativeFilePaths.joinToString(",")}")
 
         val rootDirectory = if (includeBaseDirectory) File(sourceDirPath).parentFile else File(sourceDirPath)
 
@@ -282,7 +282,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
             for (relativeFilePath in relativeFilePaths) {
                 val file = rootDirectory.resolve(relativeFilePath)
                 val cleanedRelativeFilePath = file.relativeTo(rootDirectory).path
-                Log.i("zip", "Adding file: $cleanedRelativeFilePath")
+                // Log.i("zip", "Adding file: $cleanedRelativeFilePath")
                 FileInputStream(file).use { fileInputStream ->
                     val entry = ZipEntry(cleanedRelativeFilePath)
                     entry.time = file.lastModified()
@@ -298,16 +298,16 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
     private suspend fun unzip(zipFilePath: String, destinationDirPath: String, reportProgress: Boolean, jobId: Int) {
         val destinationDir = File(destinationDirPath)
 
-        Log.d(LOG_TAG, "destinationDir.path: ${destinationDir.path}")
-        Log.d(LOG_TAG, "destinationDir.canonicalPath: ${destinationDir.canonicalPath}")
-        Log.d(LOG_TAG, "destinationDir.absolutePath: ${destinationDir.absolutePath}")
+        // Log.d(LOG_TAG, "destinationDir.path: ${destinationDir.path}")
+        // Log.d(LOG_TAG, "destinationDir.canonicalPath: ${destinationDir.canonicalPath}")
+        // Log.d(LOG_TAG, "destinationDir.absolutePath: ${destinationDir.absolutePath}")
 
         ZipFileEx(zipFilePath).use { zipFile ->
             val entriesCount = zipFile.size().toDouble()
             var currentEntryIndex = 0.0
             for (ze in zipFile.entries()) {
                 val filename = ze.name
-                Log.d(LOG_TAG, "zipEntry fileName=$filename, compressedSize=${ze.compressedSize}, size=${ze.size}, crc=${ze.crc}")
+                // Log.d(LOG_TAG, "zipEntry fileName=$filename, compressedSize=${ze.compressedSize}, size=${ze.size}, crc=${ze.crc}")
 
                 val outputFile = File(destinationDirPath, filename)
 
@@ -315,8 +315,8 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                 // https://support.google.com/faqs/answer/9294009
                 val outputFileCanonicalPath = outputFile.canonicalPath
                 if (!outputFileCanonicalPath.startsWith(destinationDir.canonicalPath)) {
-                    Log.d(LOG_TAG, "outputFile path: ${outputFile.path}")
-                    Log.d(LOG_TAG, "canonicalPath: $outputFileCanonicalPath")
+                    // Log.d(LOG_TAG, "outputFile path: ${outputFile.path}")
+                    // Log.d(LOG_TAG, "canonicalPath: $outputFileCanonicalPath")
                     throw SecurityException("Invalid zip file")
                 }
 
@@ -324,9 +324,9 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                     // report progress
                     val progress: Double = currentEntryIndex++ / (entriesCount - 1) * 100
 
-                    Log.d(LOG_TAG, "Waiting reportProgress...")
+                    // Log.d(LOG_TAG, "Waiting reportProgress...")
                     val zipFileOperation = reportProgress(jobId, ze, progress)
-                    Log.d(LOG_TAG, "...reportProgress: $zipFileOperation")
+                    // Log.d(LOG_TAG, "...reportProgress: $zipFileOperation")
 
                     if (zipFileOperation == ZipFileOperation.SKIP_ITEM) {
                         continue
@@ -337,12 +337,12 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
 
                 // need to create any missing directories
                 if (ze.isDirectory) {
-                    Log.d(LOG_TAG, "Creating directory: " + outputFile.path)
+                    // Log.d(LOG_TAG, "Creating directory: " + outputFile.path)
                     outputFile.mkdirs()
                 } else {
                     val parentDir = outputFile.parentFile
                     if (parentDir != null && !parentDir.exists()) {
-                        Log.d(LOG_TAG, "Creating directory: " + parentDir.path)
+                        // Log.d(LOG_TAG, "Creating directory: " + parentDir.path)
                         parentDir.mkdirs()
                     }
 
@@ -370,7 +370,7 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
             methodChannel?.invokeMethod("progress", map, object : Result {
 
                 override fun success(result: Any?) {
-                    Log.i(LOG_TAG, "invokeMethod - success: $result")
+                    // Log.i(LOG_TAG, "invokeMethod - success: $result")
                     when (result) {
                         "cancel" -> {
                             deferred.complete(ZipFileOperation.CANCEL)
@@ -385,13 +385,13 @@ class FlutterArchivePlugin : FlutterPlugin, MethodCallHandler {
                 }
 
                 override fun error(code: String?, msg: String?, details: Any?) {
-                    Log.e(LOG_TAG, "invokeMethod - error: $msg")
+                    // Log.e(LOG_TAG, "invokeMethod - error: $msg")
                     // ignore error and extract normally
                     deferred.complete(ZipFileOperation.INCLUDE_ITEM)
                 }
 
                 override fun notImplemented() {
-                    Log.e(LOG_TAG, "invokeMethod - notImplemented")
+                    // Log.e(LOG_TAG, "invokeMethod - notImplemented")
                     // ignore error and extract normally
                     deferred.complete(ZipFileOperation.INCLUDE_ITEM)
                 }

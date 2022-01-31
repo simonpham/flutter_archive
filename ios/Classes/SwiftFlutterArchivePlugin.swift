@@ -37,7 +37,7 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        log("call:" + call.method)
+        // log("call:" + call.method)
 
         switch call.method {
         case "zipDirectory":
@@ -64,12 +64,12 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
             let reportProgress = args["reportProgress"] as? Bool == true
             let jobId = args["jobId"] as? Int
 
-            log("sourceDir: " + sourceDir)
-            log("zipFile: " + zipFile)
-            log("includeBaseDirectory: " + includeBaseDirectory.description)
-            log("recurseSubDirs: " + recurseSubDirs.description)
-            log("reportProgress: " + reportProgress.description)
-            log("jobId: " + (jobId?.description ?? ""))
+            // log("sourceDir: " + sourceDir)
+            // log("zipFile: " + zipFile)
+            // log("includeBaseDirectory: " + includeBaseDirectory.description)
+            // log("recurseSubDirs: " + recurseSubDirs.description)
+            // log("reportProgress: " + reportProgress.description)
+            // log("jobId: " + (jobId?.description ?? ""))
 
             DispatchQueue.global(qos: .userInitiated).async {
                 let fileManager = FileManager()
@@ -90,12 +90,12 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
                                                 compressionMethod: .deflate)
                     }
                     DispatchQueue.main.async {
-                        self.log("Created zip at: " + destinationURL.path)
+                        // self.log("Created zip at: " + destinationURL.path)
                         result(true)
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        self.log("Creation of ZIP archive failed with error:\(error)")
+                        // self.log("Creation of ZIP archive failed with error:\(error)")
                         result(FlutterError(code: "ZIP_ERROR",
                                             message: error.localizedDescription,
                                             details: nil))
@@ -130,9 +130,9 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
             }
             let includeBaseDirectory = args["includeBaseDirectory"] as? Bool == true
 
-            log("files: " + files.joined(separator: ","))
-            log("zipFile: " + zipFile)
-            log("includeBaseDirectory: " + includeBaseDirectory.description)
+            // log("files: " + files.joined(separator: ","))
+            // log("zipFile: " + zipFile)
+            // log("includeBaseDirectory: " + includeBaseDirectory.description)
 
             DispatchQueue.global(qos: .userInitiated).async {
                 var sourceURL = URL(fileURLWithPath: sourceDir)
@@ -145,17 +145,17 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
                     let archive = Archive(url: destinationURL, accessMode: .create)
 
                     for item in files {
-                        self.log("Adding: " + item)
+                        // self.log("Adding: " + item)
                         try archive?.addEntry(with: item, relativeTo: sourceURL, compressionMethod: .deflate)
                     }
 
                     DispatchQueue.main.async {
-                        self.log("Created zip at: " + archive.debugDescription)
+                        // self.log("Created zip at: " + archive.debugDescription)
                         result(true)
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        self.log("Creation of ZIP archive failed with error:\(error)")
+                        // self.log("Creation of ZIP archive failed with error:\(error)")
                         result(FlutterError(code: "ZIP_ERROR",
                                             message: error.localizedDescription,
                                             details: nil))
@@ -185,8 +185,8 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
             let reportProgress = args["reportProgress"] as? Bool
             let jobId = args["jobId"] as? Int
 
-            log("zipFile: " + zipFile)
-            log("destinationDir: " + destinationDir)
+            // log("zipFile: " + zipFile)
+            // log("destinationDir: " + destinationDir)
             DispatchQueue.global(qos: .userInitiated).async {
                 let fileManager = FileManager()
                 let sourceURL = URL(fileURLWithPath: zipFile)
@@ -200,12 +200,12 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
                     }
 
                     DispatchQueue.main.async {
-                        self.log("Extracted zip to: " + destinationURL.path)
+                        // self.log("Extracted zip to: " + destinationURL.path)
                         result(true)
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        self.log("Extraction of ZIP archive failed with error:\(error)")
+                        // self.log("Extraction of ZIP archive failed with error:\(error)")
                         result(FlutterError(code: "UNZIP_ERROR",
                                             message: error.localizedDescription,
                                             details: nil))
@@ -214,7 +214,7 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
             }
 
         default:
-            log("not implemented")
+            // log("not implemented")
             result(FlutterMethodNotImplemented)
         }
     }
@@ -238,7 +238,7 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
                 let fileAttributes = try fileURL.resourceValues(forKeys: [.isRegularFileKey])
                 if fileAttributes.isRegularFile! {
                     let url = fileURL.standardizedFileURL
-                    log("Found file: " + url.path)
+                    // log("Found file: " + url.path)
                     files.append(url)
                 }
             }
@@ -254,10 +254,10 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
 
         let baseDirUrl = URL(fileURLWithPath: includeBaseDirectory ?
             sourceURL.deletingLastPathComponent().path : sourceURL.path).standardizedFileURL
-        log("baseDirUrl: " + baseDirUrl.path)
+        // log("baseDirUrl: " + baseDirUrl.path)
         for item in files {
             if reportProgress {
-                log("File: " + item.path)
+                // log("File: " + item.path)
 
                 let progress: Double = currentEntryIndex / totalEntriesCount * 100.0
 
@@ -274,14 +274,14 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
                     self.channel.invokeMethod("progress", arguments: entryDic) {
                         (result: Any?) -> Void in
                         if let error = result as? FlutterError {
-                            self.log("failed: \(error)")
+                            // self.log("failed: \(error)")
                             extractOperation = ZipFileOperation.includeItem
                         } else if FlutterMethodNotImplemented.isEqual(result) {
-                            self.log("not implemented")
+                            // self.log("not implemented")
                             extractOperation = ZipFileOperation.includeItem
                         } else {
                             extractOperation = ZipFileOperation(rawValue: result as! String)
-                            self.log("result: \(String(describing: extractOperation))")
+                            // self.log("result: \(String(describing: extractOperation))")
                         }
                         dispatchGroup.leave()
                     }
@@ -289,20 +289,20 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
 
                 currentEntryIndex += 1
 
-                log("Waiting...")
+                // log("Waiting...")
                 dispatchGroup.wait()
-                log("..waiting")
+                // log("..waiting")
                 if extractOperation == ZipFileOperation.skipItem {
-                    log("skip")
+                    // log("skip")
                     continue
                 } else if extractOperation == ZipFileOperation.cancel {
-                    log("cancel")
+                    // log("cancel")
                     break
                 }
             }
 
             let relativePath = item.path.replacingFirstOccurrence(of: baseDirUrl.path + "/", with: "")
-            log("Adding: " + relativePath)
+            // log("Adding: " + relativePath)
             try archive?.addEntry(with: relativePath, relativeTo: baseDirUrl, compressionMethod: .deflate)
         }
     }
@@ -355,14 +355,14 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
                 self.channel.invokeMethod("progress", arguments: entryDic) {
                     (result: Any?) -> Void in
                     if let error = result as? FlutterError {
-                        self.log("failed: \(error)")
+                        // self.log("failed: \(error)")
                         extractOperation = ZipFileOperation.includeItem
                     } else if FlutterMethodNotImplemented.isEqual(result) {
-                        self.log("not implemented")
+                        // self.log("not implemented")
                         extractOperation = ZipFileOperation.includeItem
                     } else {
                         extractOperation = ZipFileOperation(rawValue: result as! String)
-                        self.log("result: \(String(describing: extractOperation))")
+                        // self.log("result: \(String(describing: extractOperation))")
                     }
                     dispatchGroup.leave()
                 }
@@ -370,14 +370,14 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
 
             currentEntryIndex += 1
 
-            log("Waiting...")
+            // log("Waiting...")
             dispatchGroup.wait()
-            log("..waiting")
+            // log("..waiting")
             if extractOperation == ZipFileOperation.skipItem {
-                log("skip")
+                // log("skip")
                 continue
             } else if extractOperation == ZipFileOperation.cancel {
-                log("cancel")
+                // log("cancel")
                 break
             }
 
@@ -404,7 +404,7 @@ public class SwiftFlutterArchivePlugin: NSObject, FlutterPlugin {
 
     /// https://github.com/flutter/flutter/issues/13204
     private func log(_ message: String) {
-        NSLog("\n" + message)
+        // NSLog("\n" + message)
     }
 
     private func entryToDictionary(entry: Entry) -> [String: Any] {
